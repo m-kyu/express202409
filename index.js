@@ -8,7 +8,7 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-app.use('/',todos);
+app.use('/todos',todos);
 
 
 app.listen(3000)

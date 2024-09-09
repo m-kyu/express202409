@@ -33,9 +33,9 @@ todos.get('/:id', async function (req, res) {
 todos.post('/', async function (req, res) {
     const collection = await connect();   
                        await collection.insertOne(req.body);
-    const findResult = await collection.find({}).toArray();
+    // const findResult = await collection.find({}).toArray();
     client.close();
-    res.send(findResult)
+    res.send(req.body)
 })
 
 

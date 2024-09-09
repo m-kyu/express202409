@@ -1,48 +1,61 @@
 const express = require('express');
-const fs = require('fs');
 const todos = express.Router()
+const { MongoClient } = require('mongodb');
 
+const dbName = 'todos';
+const url = 'mongodb+srv://minkyu:abcdef2397@minkyu.rlol7cf.mongodb.net/?retryWrites=true&w=majority&appName=minkyu';
+const client = new MongoClient(url);
 
-let data = fs.readFileSync('./db/data.json');
-let dataParse = JSON.parse(data);
+async function connect(){
+    await client.connect();
+    const db = client.db(dbName);
 
-todos.get('/', function (req, res) {
-  res.send( dataParse )
+    return db.collection('data');
+}
+
+todos.get('/', async function (req, res) {
+    const collection = await connect();   
+    const findResult = await collection.find({}).toArray();
+    client.close();
+
+    res.send( findResult )
 })
-todos.get('/:id', function (req, res) {
-    let {id} = req.params;
-    let d = dataParse.list.filter((obj)=>obj.id == id);
+todos.get('/:id', async function (req, res) {
+    let id = req.params;
+    
+    const collection = await connect();   
+    const findResult = await collection.find(id).toArray();
+    client.close();
 
-    res.send(d)
-})
-
-todos.post('/', function (req, res) {
-    let body = [...dataParse.list, req.body];
-    fs.writeFileSync('./db/data.json',JSON.stringify({list:body}))
-    res.send({list:body})
-})
-
-
-todos.put('/', function (req, res) {
-    let {id,status} = req.body;  
-
-    let body = [...dataParse.list].map(obj=>{
-        if(obj.id == id){
-            obj.status = status;
-        }
-        return obj;
-    })
-
-    fs.writeFileSync('./db/data.json',JSON.stringify({list:body}))
-    res.send({list:body})
+    res.send( findResult )
 })
 
-todos.delete('/', function (req, res) {
-    let {id} = req.query;    
-    let body = [...dataParse.list].filter(obj=>obj.id != id);
+todos.post('/', async function (req, res) {
+    const collection = await connect();   
+                       await collection.insertOne(req.body);
+    const findResult = await collection.find({}).toArray();
+    client.close();
+    res.send(findResult)
+})
 
-    fs.writeFileSync('./db/data.json',JSON.stringify({list:body}))
-    res.send({list:body})
+
+todos.put('/', async function (req, res) {
+    const collection = await connect();   
+                       await collection.updateOne({id:req.body.id},{$set:req.body});
+    const findResult = await collection.find({}).toArray();
+    client.close();
+
+    res.send(findResult)
+})
+
+todos.delete('/', async function (req, res) {
+
+    const collection = await connect();   
+                       await collection.deleteOne(req.query);
+    const findResult = await collection.find({}).toArray();
+    client.close();
+
+    res.send(findResult)
 })
 
 module.exports = todos;

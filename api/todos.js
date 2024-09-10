@@ -7,53 +7,43 @@ const dbName = 'todos';
 const url = 'mongodb+srv://yicha7:test1234@cluster2.kjcecrw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster2';
 const client = new MongoClient(url);
 
+let collection;
 async function connect(){
     await client.connect();
     const db = client.db(dbName);
-
-    return db.collection('data');
+    collection = db.collection('data');
+    return collection;
 }
+connect();
+
 
 todos.get('/', async function (req, res) {
-    const collection = await connect();   
     const findResult = await collection.find({}).toArray();
-    client.close();
-
     res.send( findResult )
 })
+
 todos.get('/:id', async function (req, res) {
     let id = req.params;
-    
-    const collection = await connect();   
     const findResult = await collection.find(id).toArray();
-    client.close();
 
     res.send( findResult )
 })
 
 todos.post('/', async function (req, res) {
-    const collection = await connect();   
-                       await collection.insertOne(req.body);
-    client.close();
+    await collection.insertOne(req.body);
     res.send('done');
 })
 
 
 todos.put('/', async function (req, res) {
-    console.log(req.body)
-    const collection = await connect();   
-                       await collection.updateOne({id:req.body.id},{$set:req.body});
-    client.close();
-
+    await collection.updateOne({id:req.body.id},{$set:req.body});
     res.send('done');
 })
 
 todos.delete('/', async function (req, res) {
-
-    const collection = await connect();   
-                       await collection.deleteOne(req.query);
-    client.close();
+    await collection.deleteOne(req.query);
     res.send('done');
 })
+
 
 module.exports = todos;

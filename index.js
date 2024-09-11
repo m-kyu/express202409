@@ -8,8 +8,7 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-todos().then(todosRouter => {
-    app.use('/todos', todosRouter);
-    app.listen(4000);
-})
-   
+app.use('/todos',todos);
+
+
+app.listen(4000)

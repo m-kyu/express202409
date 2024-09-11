@@ -12,12 +12,13 @@ async function connect(){
     await client.connect();
     const db = client.db(dbName);
     collection = db.collection('data');
-    return collection;
+    return;
 }
-connect();
+
 
 
 todos.get('/', async function (req, res) {
+    await connect();
     const findResult = await collection.find({}).toArray();
     res.send( findResult )
 })
